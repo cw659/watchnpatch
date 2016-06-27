@@ -1,0 +1,164 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <title>Force Directed Graphical Layout</title>
+	<script type="text/javascript" src="protovis-d3.2.js"></script>
+    <script type="text/javascript" src="hinton.js"></script>
+    <style type="text/css">   
+      #fig {width: 900px; height: 800px;}
+    </style>
+  </head>
+  <body>
+    <div id="fig">
+    <script type="text/javascript+protovis">
+
+var w = 900,
+    h = 800,
+	active1 = 0,
+	active2 = 1,
+	corrvalue = 0,
+	factor = 9,
+    colors = pv.Colors.category19(),
+	minlink = 5;
+
+var vis = new pv.Panel()
+    .width(w)
+    .height(h-150)
+    .fillStyle("white");	
+
+var layout = vis.add(pv.Layout.Matrix)
+	.nodes(graph.nodes)
+	.links(graph.links)
+	.top(70).left(60)
+	.width(550).height(550);
+
+layout.link.add(pv.Bar)
+	.fillStyle("#eee")
+	.event("mouseover", function(l) grabtopic(l.linkValue,l.sourceNode.index,l.targetNode.index))
+	.lineWidth(1);
+
+layout.link.add(pv.Bar)
+	.height(function(l) barsize(l.linkValue))
+	.width(function(l) barsize(l.linkValue))
+	.event("mouseover", function(l) grabtopic(l.linkValue,l.sourceNode.index,l.targetNode.index))
+	.fillStyle(function(l) corrcolor(l.linkValue));
+
+layout.label.add(pv.Label)
+	.text(function(d) topw[d.index][0][0]);
+
+var topic1 = vis.add(pv.Bar)
+	.data(function() topw[active1])
+	.top(function(d) this.index * 25 + 70)
+	.left(w-210)
+	.width(function(d) d[1])
+	.height(15)
+	.anchor("left").add(pv.Label)
+		.textAlign("right")		
+		.text(function(d) d[0]); 
+
+var topic2 = vis.add(pv.Bar)
+	.data(function() topw[active2])
+	.top(function(d) this.index * 25 + 70)
+	.left(w-60)
+	.width(function(d) d[1])
+	.height(15)
+	.anchor("left").add(pv.Label)
+		.textAlign("right")		
+		.text(function(d) d[0]); 
+
+// p(word) bar
+vis.add(pv.Bar)
+	.width(100)
+	.top(40)
+	.height(20)
+	.left(w-210)
+	.anchor("right")
+		.add(pv.Label)
+		.text("p(word) = .2")
+		.textStyle("white");
+
+// Positive/negative bars
+vis.add(pv.Bar)
+	.width(45).height(15)
+	.top(40)
+	.right(10)
+	.fillStyle("blue")
+	.anchor("right")
+		.add(pv.Label)
+		.text("Negative")
+		.textStyle("white");
+
+vis.add(pv.Bar)
+	.width(40).height(15)
+	.top(40)
+	.right(60)
+	.fillStyle("red")
+	.anchor("right")
+		.add(pv.Label)
+		.text("Positive")
+		.textStyle("white");
+
+
+vis.add(pv.Label)
+	.width(100)
+	.bottom(0)
+	.left(50)
+	.font("16px verdana")
+	.text(function() "Topics " + topw[active1][0][0] + " and " + topw[active2][0][0] + " have been selected with a  correlation value of " + corrvalue);
+
+vis.render();
+
+function barsize(corr){
+	if (corr >= 10){
+		var size = Math.sqrt(Math.abs(corr-10)) * factor;
+	}
+	else if (corr == 0){
+		var size = 0;
+	}
+	else if (corr < 10){
+		var size = Math.sqrt(Math.abs(10-corr)) * factor;
+	}
+	return size;
+}
+
+function grabtopic(corr, sid, tid){
+	active1 = sid;
+	active2 = tid;
+	if (sid == tid){
+	corrvalue = 1;}
+	else {
+	corrvalue = Math.round((corr/10-1)*Math.pow(10,3))/Math.pow(10,3);}
+	vis.render();
+}
+
+function corrcolor(corr){
+	if (corr == 0){
+		var colorstr = "white";
+	}
+	else if (corr < 10){
+		var colorstr = "blue";
+	}
+	else{
+		var colorstr = "red";
+	}
+return colorstr;
+}
+
+function showbars(index)
+{
+	topicwords = topw[index];
+	topic.render();
+	vis.render();
+}
+
+var menu=document.getElementById("results");
+menu.onchange =
+function(){ //run some code when "onchange" event fires
+	var selected=this.options[this.selectedIndex] //this refers to "selectmenu"
+	if (selected.value!="nothing"){ //if filename is a external JavaScript file
+  		window.location=selected.value;
+ 	}
+}
+     </script>
+   </div>
+</body>
+</html>

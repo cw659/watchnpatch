@@ -24,22 +24,18 @@ tbp = catm.var.tbp;
 tnbp = 1-tbp;
 
 W = catm.param.W;
-betasum =  beta*W;
+betasum = beta*W;
 
 for d=1:D,
     
-    pi = exp(catm.var.logpi(:,d));
+    pi = exp(catm.var.logphi(:,d));
 	
 	z = catm.var.z{d};
     rtime = dataobj.data.rtime{d};
-    rtime(rtime>=0)=1./(1-rtime(rtime>=0))-1;
-    rtime(rtime<0)=1-1./(1+rtime(rtime<0));
-%     srtime = (rtime+1)/2;
         
     nword = size(rtime,1);
-    
     words = dataobj.data.doc{d};
-    
+
     score = zeros(nword,1);
     
     for wi = 1:nword
@@ -54,27 +50,14 @@ for d=1:D,
         
         otherZ = z(otherW)';
         wrtime = rtime(wi,otherW);
-%         wsrtime = srtime(wi,otherW);
         ki = Topic;
-%         for ki=1:K
-            sind=otherZ==ki;
-            spt=normpdf(wrtime(sind),stmu(ki),stvar(ki));
-            pind=otherZ~=ki&wrtime>=0; 
-%             ppt=gammapdf(wrtime(pind),ptmu(ki,otherZ(pind)),ptvar(ki,otherZ(pind)));
-            ppt=tbp(ki,otherZ(pind)).*gammapdf(wrtime(pind),ptmu(ki,otherZ(pind)),ptvar(ki,otherZ(pind)));
-%             ppt=tbp(ki,otherZ(pind)).*gampdf(wrtime(pind),ptmu(ki,otherZ(pind)),ptvar(ki,otherZ(pind)));
-%             ppt=tbp(ki,otherZ(pind)).*betapdf(wrtime(pind),ptmu(ki,otherZ(pind)),ptvar(ki,otherZ(pind)));
-            nind=otherZ~=ki&wrtime<0;
-%             npt=gammapdf(-wrtime(nind),ntmu(ki,otherZ(nind)),ntvar(ki,otherZ(nind)));
-            npt=tnbp(ki,otherZ(nind)).*gammapdf(-wrtime(nind),ntmu(ki,otherZ(nind)),ntvar(ki,otherZ(nind)));
-%             npt=tnbp(ki,otherZ(nind)).*gampdf(-wrtime(nind),ntmu(ki,otherZ(nind)),ntvar(ki,otherZ(nind)));
-%             npt=tnbp(ki,otherZ(nind)).*betapdf(-wrtime(nind),ntmu(ki,otherZ(nind)),ntvar(ki,otherZ(nind)));
-            pt=prod([spt ppt npt]);
-%         end
-
-%         pt(pt==inf) = max(pt(pt~=inf));
-%         
-%         pt(isnan(pt))=0;
+        sind=otherZ==ki;
+        spt=normpdf(trans_time(wrtime(sind)),stmu(ki),stvar(ki));
+        pind = otherZ~=ki&wrtime>0;
+        ppt=tbp(ki,otherZ(pind)).*normpdf(trans_time(wrtime(pind)), ptmu(ki,otherZ(pind)), ptvar(ki,otherZ(pind)));
+        nind = otherZ~=ki&wrtime<0;
+        npt=tnbp(ki,otherZ(nind)).*normpdf(trans_time(wrtime(nind)), ntmu(ki,otherZ(nind)), ntvar(ki,otherZ(nind)));
+        pt=prod([spt ppt npt]);
         
         score(wi) = pi(Topic).*(nkw(Topic,word)+beta).*pt./(nk(Topic)+betasum);
         

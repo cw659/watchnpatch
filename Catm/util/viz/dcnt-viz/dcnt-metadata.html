@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> 
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <title>Feature over Time Layout</title>
+    <script type="text/javascript" src="protovis-d3.2.js"></script>
+    <script type="text/javascript" src="metadata.js"></script>
+    <style type="text/css">   
+      #fig {width: 900px; height: 800px;}
+    </style>
+    </head>
+  <body>
+     <div id="fig">
+        <html>
+  <head>
+    <title>Feature over Time Layout</title>
+    <script type="text/javascript" src="../../js/protovis-d3.2.js"></script>
+    <script type="text/javascript" src="../../data/<?echo $fname?>"></script>
+  </head>
+
+  <body>
+<script type="text/javascript+protovis">
+	
+var w = 975,
+	h = 800,
+	histw = w-80;
+	loffset = 30;
+	numf = ft.length;
+	base = 20,
+	minfont = 8,
+	factor = 3,
+	topicwords = topw[0],
+	activecolor = 0,
+	y = pv.Scale.linear(.1,1).range(60,520),
+	x = pv.Scale.linear(0,numf).range(65,w-50),
+	color = pv.Colors.category20();
+	
+var vis = new pv.Panel()
+	.width(w)
+	.height(h-150);
+
+vis.add(pv.Layout.Stack)
+	.bottom(base)
+	.layers(labels)
+	.values(ft)
+	//.x(function(d) x(d.date))
+	.x(function(d) (this.index) * (histw)/(numf-1) + loffset)
+	.y(function(d,t) d[t]*500)
+	.layer.add(pv.Area)
+		.def("a", 1)
+		.fillStyle(function(d) color(this.parent.index).alpha(this.a()))
+		.event("mouseover", function() this.a(.5))
+		.event("mouseout", function() this.a(1))
+		.event("click", function() updatewords(this.parent.index));
+
+/* top words */
+vis.add(pv.Bar)
+	.data(function() topicwords)
+	.top(function(d) Math.floor(this.index/10) * 22 + 20)
+	.left(function(d) 90 * (this.index%10) + 40)
+	.width(0)
+	.height(20)
+	.anchor("top").add(pv.Label)
+		.textAlign("left")		
+		.text(function(d) d[0])
+		.textStyle(function() color(activecolor))
+		.font(function(d) (Math.sqrt(d[1]*factor) + minfont) + "px sans-serif"); 
+
+/* yticks */
+vis.add(pv.Rule)
+	.data(y.ticks())
+	.strokeStyle("#eee")
+	.left(loffset)
+	.width(0)
+	.bottom(y)
+	.anchor("left").add(pv.Label).text(y.tickFormat);
+
+/* xticks */
+
+vis.add(pv.Rule)
+	.data(ft)
+	.strokeStyle("eee")
+	.left(function(d) (this.index) * (histw)/(numf-1) + loffset)
+	.height(500)
+	.bottom(20)
+	.anchor("bottom").add(pv.Label).text(function(d) d.date);
+
+vis.render();
+
+function updatewords(index)
+{
+	topicwords = topw[index];
+	activecolor = index;
+	vis.render();
+}
+var menu=document.getElementById("results");
+menu.onchange =
+function(){ //run some code when "onchange" event fires
+	var selected=this.options[this.selectedIndex] //this refers to "selectmenu"
+	if (selected.value!="nothing"){ //if filename is a external JavaScript file
+  		window.location=selected.value;
+ 	}
+}
+
+
+</script>
+     </div>
+  </body>
+</html>
+

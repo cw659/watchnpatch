@@ -1,5 +1,5 @@
 function [catm] = CatmInit(dataobj, K, W, J, T)
-%% Initialize the sampler
+%% Initialize the sampler.
 % dataobj: the structure holds the data
 % K: number of topics
 % W: the number of unique words
@@ -95,23 +95,23 @@ for d=1:D
     rtime = dataobj.data.rtime{d};
     nword = size(rtime,1);
 
-    rtime(rtime>=0)=tand(-pi/2+pi*rtime(rtime>=0));
-    rtime(rtime<0)=tand(pi/2+pi*rtime(rtime<0));
-
     for wi1=1:nword
         for wi2=[1:wi1-1 wi1+1:nword]
             if(z(wi1)==z(wi2))
-                stku(z(wi1)) = stku(z(wi1))+rtime(wi1,wi2);
-                stkv(z(wi1)) = stkv(z(wi1))+rtime(wi1,wi2)^2;
+                trans_rtime = trans_time(rtime(wi1,wi2));
+                stku(z(wi1)) = stku(z(wi1))+trans_rtime;
+                stkv(z(wi1)) = stkv(z(wi1))+trans_rtime^2;
                 stkn(z(wi1)) = stkn(z(wi1))+1;
             else
                 if(rtime(wi1,wi2)>=0)
-                    ptku(z(wi1),z(wi2)) = ptku(z(wi1),z(wi2))+rtime(wi1,wi2);
-                    ptkv(z(wi1),z(wi2)) = ptkv(z(wi1),z(wi2))+rtime(wi1,wi2)^2;
+                    trans_rtime = trans_time(rtime(wi1,wi2));
+                    ptku(z(wi1),z(wi2)) = ptku(z(wi1),z(wi2))+trans_rtime;
+                    ptkv(z(wi1),z(wi2)) = ptkv(z(wi1),z(wi2))+trans_rtime^2;
                     ptkn(z(wi1),z(wi2)) = ptkn(z(wi1),z(wi2))+1;
                 else
-                    ntku(z(wi1),z(wi2)) = ntku(z(wi1),z(wi2))-rtime(wi1,wi2);
-                    ntkv(z(wi1),z(wi2)) = ntkv(z(wi1),z(wi2))+rtime(wi1,wi2)^2;
+                    trans_rtime = trans_time(rtime(wi1,wi2));
+                    ntku(z(wi1),z(wi2)) = ntku(z(wi1),z(wi2))-trans_rtime;
+                    ntkv(z(wi1),z(wi2)) = ntkv(z(wi1),z(wi2))+trans_rtime^2;
                     ntkn(z(wi1),z(wi2)) = ntkn(z(wi1),z(wi2))+1;
                 end
             end
@@ -151,7 +151,6 @@ for k1=1:K
     end
 end
 
-
 %% Store parameters and variables.
 catm.var.Sigma = Sigma;
 catm.var.v = v;
@@ -159,7 +158,6 @@ catm.var.mu = mu;
 catm.var.nkw = nkw;
 catm.var.nkd = nkd;
 catm.var.nk = nk;
-catm.var.accept = zeros(K-1,1);
 catm.var.ptmu = ptmu;
 catm.var.ptvar = ptvar;
 catm.var.ntmu = ntmu;
@@ -167,6 +165,7 @@ catm.var.ntvar = ntvar;
 catm.var.stmu = stmu;
 catm.var.stvar = stvar;
 catm.var.tbp = tbp;
+catm.var.accept = zeros(K-1,1);
 %Model parameters
 catm.param.T = T;
 catm.param.K = K;
