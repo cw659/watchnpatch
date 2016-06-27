@@ -1,5 +1,3 @@
-# watchnpatch
-
 # Run the training in Catm.
 ```
 catm = CatmRun(savefid, dataobj, K, W, N, J, T, S)
@@ -12,7 +10,7 @@ catm = CatmRun(savefid, dataobj, K, W, N, J, T, S)
 %dataobj.data.doc: a cell of docs, each of which is a word index vector
 %dataobj.data.rtime: a cell of doc's relative time, each of which is nword*nword matrix
 ```
-# kinect v2 data read and visiualization tool.
+# Kinect v2 data read and visiualization in tools.
 
 watch_data.m - read single frame from video and visualize it, contains all functions in the tool
 
